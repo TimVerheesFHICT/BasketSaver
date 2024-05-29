@@ -38,11 +38,12 @@ jobs:
             uses: actions/setup-node@v2
             with:
               node-version: '16.x'
-          - name: Running workers and populating db
+          - name: Running workers
             run: |
               docker exec --detach catalogservice python BasketSaverCatalogService/BasketSaverCatalogService/manage.py start_worker
               docker exec --detach groceryservice python BasketSaverGroceryListService/BasketSaverGroceryListService/manage.py start_worker
-              docker exec catalogservice python BasketSaverCatalogService/BasketSaverCatalogService/manage.py populate_db_testing
+          - name: Populating DB
+            run: docker exec catalogservice python BasketSaverCatalogService/BasketSaverCatalogService/manage.py populate_db_testing
           - name: Installing Newman
             run: |
               docker ps
