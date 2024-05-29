@@ -20,7 +20,7 @@ def callback(ch, method, properties, body):
     print(f" [x] {method.routing_key}:{body}")
     stores_list = Store.objects.all()
     for store in stores_list:
-        GroceryList.objects.create(
+        GroceryList.objects.get_or_create(
             user = body,
             store = store
         )

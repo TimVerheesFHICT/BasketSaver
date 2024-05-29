@@ -17,10 +17,6 @@ jobs:
               mv BasketSaverUserService/.env.example BasketSaverUserService/.env
               mv BasketSaverCatalogService/.env.example BasketSaverCatalogService/.env
               mv BasketSaverGroceryListService/.env.example BasketSaverGroceryListService/.env
-              ls .
-              ls BasketSaverUserService/
-              ls BasketSaverCatalogService/
-              ls BasketSaverGroceryListService/
 
           - uses: actions/setup-python@v4
             with:
@@ -28,10 +24,6 @@ jobs:
 
           - name: Building backend docker images
             run: |
-              ls .
-              ls BasketSaverUserService/
-              ls BasketSaverCatalogService/
-              ls BasketSaverGroceryListService/
               docker compose up -d
           
           - name: Waiting for containers
@@ -40,4 +32,19 @@ jobs:
           - name: Running unit tests
             run: |
               docker ps
+              docker exec --detach catalogservice python BasketSaverCatalogService/BasketSaverCatalogService/manage.py start_worker
+              docker exec --detach groceryservice python BasketSaverGroceryListService/BasketSaverGroceryListService/manage.py start_worker
               docker exec userservice python manage.py test
+              docker exec --detach catalogservice python BasketSaverCatalogService/BasketSaverCatalogService/manage.py populate_db_testing
+          - name: Installing NPM
+            uses: actions/setup-node@v2
+            with:
+              node-version: '16.x'
+          - name: Installing Newman
+            run: |
+              docker ps
+              npm i newman -g
+          - name: Running Integration Tests
+            run: | 
+              docker ps
+              newman run Individual.postman_collection.json
