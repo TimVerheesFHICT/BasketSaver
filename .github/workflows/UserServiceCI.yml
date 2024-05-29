@@ -22,7 +22,11 @@ jobs:
               python-version: '3.9'
 
           - name: Building backend docker images
-            run:
+            run: |
+              ls .
+              ls BasketSaverUserService/
+              ls BasketSaverCatalogService/
+              ls BasketSaverGroceryListService/
               docker compose up -d
           
           - name: Waiting for containers
