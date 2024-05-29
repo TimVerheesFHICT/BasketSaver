@@ -13,7 +13,9 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							""
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -76,7 +78,9 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							""
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
 						],
 						"type": "text/javascript",
 						"packages": {}
@@ -91,12 +95,12 @@
 					"formdata": [
 						{
 							"key": "username",
-							"value": "SirValky",
+							"value": "BobJaja",
 							"type": "default"
 						},
 						{
 							"key": "password",
-							"value": "33lollpoP!",
+							"value": "testingpassword",
 							"type": "default"
 						},
 						{
@@ -149,12 +153,26 @@
 		},
 		{
 			"name": "Add grocerylistitem",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "POST",
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"user_id\": 3,\r\n    \"store\": \"ah\",\r\n    \"item\": 3,\r\n    \"amount\": 3\r\n}",
+					"raw": "{\r\n    \"user_id\": 0,\r\n    \"store\": \"ah\",\r\n    \"item\": 2,\r\n    \"amount\": 3\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -179,11 +197,27 @@
 		},
 		{
 			"name": "Get GroceryListItems",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Check if item was correctly added and whether item information is fetched\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData[0].items[0].id).to.eql(2);\r",
+							"    pm.expect(jsonData[0].items[0].name).to.eql(\"Adventuros Strips strips hert wild\")\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "http://localhost:8080/grocery_service/grocery_list/get_items?user_id=2",
+					"raw": "http://localhost:8080/grocery_service/grocery_list/get_items?user_id=0",
 					"protocol": "http",
 					"host": [
 						"localhost"
@@ -197,7 +231,7 @@
 					"query": [
 						{
 							"key": "user_id",
-							"value": "2"
+							"value": "0"
 						}
 					]
 				}
