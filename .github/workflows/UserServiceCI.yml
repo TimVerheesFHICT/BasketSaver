@@ -14,9 +14,9 @@ jobs:
           - uses: actions/checkout@v3
           - name: Setup Environment variables
             run: |
-              mv BasketSaverUserService/.env.example .env
-              mv BasketSaverCatalogService/.env.example .env
-              mv BasketSaverGroceryListService/.env.example .env
+              mv BasketSaverUserService/.env.example BasketSaverUserService/.env
+              mv BasketSaverCatalogService/.env.example BasketSaverCatalogService/.env
+              mv BasketSaverGroceryListService/.env.example BasketSaverGroceryListService/.env
               ls .
               ls BasketSaverUserService/
               ls BasketSaverCatalogService/
