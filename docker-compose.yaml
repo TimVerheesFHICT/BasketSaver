@@ -18,16 +18,16 @@ services:
     restart: "no"
     environment: 
       - PYTHONBUFFERED=1
-    container_name: user_service
+    container_name: userservice
     command : bash -c "python check_db.py --service-name userdb --ip userdb --port 3306 && 
-              python manage.py runserver 0.0.0.0:8000"
+              python manage.py runserver 0.0.0.0:8060"
     
     env_file: ./BasketSaverUserService/.env
     build:
       context: ./BasketSaverUserService/
       dockerfile: Dockerfile.backend
     ports:
-      - "8000:8000"
+      - "8060:8060"
     depends_on:
       - userdb
     networks:
@@ -49,7 +49,7 @@ services:
 
   groceryservice:
     restart: "no"
-    container_name: grocery_service
+    container_name: groceryservice
     command : bash -c "python check_db.py --service-name grocerydb --ip grocerydb --port 3306 && 
               python manage.py runserver 0.0.0.0:8080"
     
@@ -89,7 +89,7 @@ services:
 
   catalogservice:
     restart: "no"
-    container_name: catalog_service
+    container_name: catalogservice
     command : bash -c "python check_db.py --service-name catalogdb --ip catalogdb --port 3306 && 
               python manage.py runserver 0.0.0.0:6060"
     
