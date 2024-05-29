@@ -1,0 +1,31 @@
+name: Build and test Python app - BasketSaverUserService
+
+on:
+  push:
+    branches: [ 'development' ]
+  pull_request:
+    branches: [ 'development']
+  
+jobs:
+  test:
+      name: Test
+      runs-on: ubuntu-latest
+      steps:
+          - uses: actions/checkout@v3
+          - name: Setup Environment variables
+            run: mv .env.example .env
+          - uses: actions/setup-python@v4
+            with:
+              python-version: '3.9'
+
+          - name: Building backend docker images
+            run:
+              docker compose up -d
+          
+          - name: Waiting for containers
+            run: |
+              sleep 5s
+          - name: Running unit tests
+            run: |
+              docker ps
+              docker exec user_service python manage.py test

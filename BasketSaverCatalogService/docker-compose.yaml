@@ -1,0 +1,40 @@
+version: "3.11"
+
+services:
+  catalogdb:
+    restart: "no"
+    env_file: .env
+    container_name: catalogdb
+    image: mariadb:10.9
+    ports:
+      - "3304:${MYSQL_PORT}"
+    networks:
+      - catalogdb-net
+    volumes:
+      - catalogvolume:/var/lib/catalog
+
+  catalogservice:
+    restart: "no"
+    container_name: catalog_service
+    command : bash -c "python check_db.py --service-name catalogdb --ip catalogdb --port ${MYSQL_PORT} && 
+              python manage.py runserver 0.0.0.0:${DJANGO_PORT}"
+    
+    env_file: .env
+    build:
+      context: ./
+      dockerfile: Dockerfile.backend
+    ports:
+      - "6060:${DJANGO_PORT}"
+    depends_on:
+      - catalogdb
+    networks:
+      - catalogdb-net
+    volumes:
+      - .:/bscatalogservice/
+
+networks:
+  catalogdb-net:
+    driver: bridge
+
+volumes:
+  catalogvolume:

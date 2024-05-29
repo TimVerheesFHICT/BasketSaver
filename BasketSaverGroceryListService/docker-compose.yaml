@@ -1,0 +1,40 @@
+version: "3.11"
+
+services:
+  grocerydb:
+    restart: "no"
+    env_file: .env
+    container_name: grocerydb
+    image: mariadb:10.9
+    ports:
+      - "3300:${MYSQL_PORT}"
+    networks:
+      - bssaver-net
+    volumes:
+      - groceryvolume:/var/lib/grocery
+
+  groceryservice:
+    restart: "no"
+    container_name: grocery_service
+    command : bash -c "python check_db.py --service-name grocerydb --ip grocerydb --port ${MYSQL_PORT} && 
+              python manage.py runserver 0.0.0.0:${DJANGO_PORT}"
+    
+    env_file: .env
+    build:
+      context: ./
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8080:${DJANGO_PORT}"
+    depends_on:
+      - grocerydb
+    networks:
+      - bssaver-net
+    volumes:
+      - .:/bsgroceryservice/
+
+networks:
+  bssaver-net:
+    driver: bridge
+
+volumes:
+  groceryvolume:

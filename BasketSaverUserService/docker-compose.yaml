@@ -1,0 +1,43 @@
+version: "3.11"
+
+services:
+  userdb:
+    restart: "no"
+    env_file: .env
+    container_name: userdb
+    image: mariadb:10.9
+    ports:
+      - "3302:${MYSQL_PORT}"
+    networks:
+      - bssaver-net
+    volumes:
+      - uservolume:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  userservice:
+    restart: "no"
+    environment: 
+      - PYTHONBUFFERED=1
+    container_name: user_service
+    command : bash -c "python check_db.py --service-name userdb --ip userdb --port ${MYSQL_PORT} && 
+              python manage.py runserver 0.0.0.0:${DJANGO_PORT}"
+    
+    env_file: .env
+    build:
+      context: ./
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8000:${DJANGO_PORT}"
+    depends_on:
+      - userdb
+    networks:
+      - bssaver-net
+    volumes:
+      - .:/bsuserservice/
+
+networks:
+  bssaver-net:
+    driver: bridge
+
+volumes:
+  uservolume:
