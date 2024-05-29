@@ -48,3 +48,4 @@ jobs:
             run: | 
               docker ps
               newman run Individual.postman_collection.json
+              docker logs userservice
