@@ -32,14 +32,17 @@ jobs:
           - name: Running unit tests
             run: |
               docker ps
-              docker exec --detach catalogservice python BasketSaverCatalogService/BasketSaverCatalogService/manage.py start_worker
-              docker exec --detach groceryservice python BasketSaverGroceryListService/BasketSaverGroceryListService/manage.py start_worker
               docker exec userservice python manage.py test
-              docker exec --detach catalogservice python BasketSaverCatalogService/BasketSaverCatalogService/manage.py populate_db_testing
+              
           - name: Installing NPM
             uses: actions/setup-node@v2
             with:
               node-version: '16.x'
+          - name: Running workers and populating db
+            run: |
+              docker exec --detach catalogservice python BasketSaverCatalogService/BasketSaverCatalogService/manage.py start_worker
+              docker exec --detach groceryservice python BasketSaverGroceryListService/BasketSaverGroceryListService/manage.py start_worker
+              docker exec catalogservice python BasketSaverCatalogService/BasketSaverCatalogService/manage.py populate_db_testing
           - name: Installing Newman
             run: |
               docker ps
