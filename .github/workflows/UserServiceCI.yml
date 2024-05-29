@@ -8,7 +8,6 @@ on:
   
 jobs:
   test:
-      continue-on-error: true
       name: Test
       runs-on: ubuntu-latest
       steps:
@@ -49,6 +48,7 @@ jobs:
             run: | 
               docker ps
               newman run Individual.postman_collection.json
+            continue-on-error: true
           - name: Logging
             run: |
               docker logs userservice
