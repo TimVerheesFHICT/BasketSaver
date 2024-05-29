@@ -13,7 +13,9 @@ jobs:
       steps:
           - uses: actions/checkout@v3
           - name: Setup Environment variables
-            run: mv BasketSaverUserService/.env.example .env
+            run: mv BasketSaverUserService/.env.example .env &&
+            mv BasketSaverCatalogService/.env.example .env && 
+            mv BasketSaverGroceryListService/.env.example .env
           - uses: actions/setup-python@v4
             with:
               python-version: '3.9'
