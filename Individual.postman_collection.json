@@ -54,12 +54,12 @@
 					]
 				},
 				"url": {
-					"raw": "http://localhost:8000/user_service/account/register",
+					"raw": "http://localhost:8060/user_service/account/register",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8000",
+					"port": "8060",
 					"path": [
 						"user_service",
 						"account",
@@ -120,12 +120,12 @@
 					]
 				},
 				"url": {
-					"raw": "http://localhost:8000/user_service/account/login",
+					"raw": "http://localhost:8060/user_service/account/login",
 					"protocol": "http",
 					"host": [
 						"localhost"
 					],
-					"port": "8000",
+					"port": "8060",
 					"path": [
 						"user_service",
 						"account",
