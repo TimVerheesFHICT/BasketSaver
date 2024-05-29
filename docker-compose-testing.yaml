@@ -1,0 +1,119 @@
+version: "3.11"
+
+services:
+  userdb:
+    restart: "no"
+    env_file: ./BasketSaverUserService/.env
+    container_name: userdb
+    image: mariadb:10.9
+    ports:
+      - "3302:3306"
+    networks:
+      - bssaver-net
+    volumes:
+      - uservolume:/var/lib/mysql
+      - ./BasketSaverUserService/init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  userservice:
+    restart: "no"
+    environment: 
+      - PYTHONBUFFERED=1
+    container_name: userservice
+    command : bash -c "python check_db.py --service-name userdb --ip userdb --port 3306 && 
+              python manage.py migrate &&
+              python manage.py runserver 0.0.0.0:8060"
+    
+    env_file: ./BasketSaverUserService/.env
+    build:
+      context: ./BasketSaverUserService/
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8060:8060"
+    depends_on:
+      - userdb
+    networks:
+      - bssaver-net
+    volumes:
+      - .:/bsuserservice/BasketSaverUserService/
+
+  grocerydb:
+    restart: "no"
+    env_file: ./BasketSaverGroceryListService/.env
+    container_name: grocerydb
+    image: mariadb:10.9
+    ports:
+      - "3300:3306"
+    networks:
+      - bssaver-net
+    volumes:
+      - groceryvolume:/var/lib/grocery
+
+  groceryservice:
+    restart: "no"
+    container_name: groceryservice
+    command : bash -c "python check_db.py --service-name grocerydb --ip grocerydb --port 3306 && 
+              python manage.py migrate &&
+              python manage.py runserver 0.0.0.0:8080"
+    
+    env_file: ./BasketSaverGroceryListService/.env
+    build:
+      context: ./BasketSaverGroceryListService/
+      dockerfile: Dockerfile.backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - grocerydb
+    networks:
+      - bssaver-net
+    volumes:
+      - .:/bsgroceryservice/BasketSaverGroceryListService/
+
+  some-rabbit:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+    networks:
+      - bssaver-net
+    depends_on:
+      - userservice
+
+  catalogdb:
+    restart: "no"
+    env_file: ./BasketSaverCatalogService/.env
+    container_name: catalogdb
+    image: mariadb:10.9
+    ports:
+      - "3304:3306"
+    networks:
+      - bssaver-net
+    volumes:
+      - catalogvolume:/var/lib/catalog
+
+  catalogservice:
+    restart: "no"
+    container_name: catalogservice
+    command : bash -c "python check_db.py --service-name catalogdb --ip catalogdb --port 3306 && 
+              python manage.py migrate &&
+              python manage.py runserver 0.0.0.0:6060"
+    
+    env_file: ./BasketSaverCatalogService/.env
+    build:
+      context: ./BasketSaverCatalogService/
+      dockerfile: Dockerfile.backend
+    ports:
+      - "6060:6060"
+    depends_on:
+      - catalogdb
+    networks:
+      - bssaver-net
+    volumes:
+      - .:/bscatalogservice/BasketSaverCatalogService/
+
+networks:
+  bssaver-net:
+    driver: bridge
+
+volumes:
+  uservolume:
+  groceryvolume:
+  catalogvolume:

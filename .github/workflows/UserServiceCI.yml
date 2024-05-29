@@ -24,7 +24,7 @@ jobs:
 
           - name: Building backend docker images
             run: |
-              docker compose up -d
+              docker compose -f docker-compose-testing.yaml up -d
           
           - name: Waiting for containers
             run: |
