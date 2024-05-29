@@ -30,5 +30,5 @@ class Command(BaseCommand):
                     print("Something went wrong with" + product["n"])
                     print(e)    
                 i=i+1
-                if i > 9 :
+                if i > 1 :
                     break
