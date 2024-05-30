@@ -51,10 +51,17 @@ jobs:
             run: |
               docker ps
               npm i newman -g
-          - name: Running Integration Tests
+          - name: Running Integration Tests part 1
             run: | 
               docker ps
-              newman run Individual.postman_collection.json
+              newman run collections/IndivPart1.json
+            continue-on-error: true
+          - name: Checking Users
+            run: |
+              docker exec userservice python BasketSaverUserService/BasketSaverUserService/manage.py check-users
+              docker exec groceryservice python BasketSaverGroceryListService/BasketSaverGroceryListService/manage.py check-glist
+          - name: Running Integration Tests part 2
+            run: newman run collections/IndivPart2.json
             continue-on-error: true
           - name: Logging
             run: |

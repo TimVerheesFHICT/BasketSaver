@@ -1,0 +1,279 @@
+{
+	"info": {
+		"_postman_id": "abf3cfbd-6134-4f55-850e-f5bc14314590",
+		"name": "Indiv Integration Testing part 2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "33839418"
+	},
+	"item": [
+		{
+			"name": "Add grocerylistitem",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"user_id\": 1,\r\n    \"store\": \"ah\",\r\n    \"item\": 2,\r\n    \"amount\": 3\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/grocery_service/grocery_list/item_add",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"grocery_service",
+						"grocery_list",
+						"item_add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get GroceryListItems",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Check if item was correctly added and whether item information is fetched\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData[0].items[0].id).to.eql(2);\r",
+							"    pm.expect(jsonData[0].items[0].name).to.eql(\"Adventuros Strips strips hert wild\")\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/grocery_service/grocery_list/get_items?user_id=1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"grocery_service",
+						"grocery_list",
+						"get_items"
+					],
+					"query": [
+						{
+							"key": "user_id",
+							"value": "1"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get GroceryListItems Copy 2",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"grocery_list_item\": 1,\r\n    \"amount\": 45\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/grocery_service/grocery_list/item_update",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"grocery_service",
+						"grocery_list",
+						"item_update"
+					],
+					"query": [
+						{
+							"key": "grocery_list_item",
+							"value": "2",
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get Items",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Your test name\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.length).to.not.eql(0);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:6060/catalog_service/get_items?search_query=AA drink",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "6060",
+					"path": [
+						"catalog_service",
+						"get_items"
+					],
+					"query": [
+						{
+							"key": "search_query",
+							"value": "AA drink"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "key",
+				"value": "CSRF_COOKIE",
+				"type": "string"
+			},
+			{
+				"key": "value",
+				"value": "{{csrftoken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"// Initialize the cookie jar to be used. This is necessary for automating API tests.\r",
+					"// Because the response header \"Set-Cookie\" does not work when run in the CLI and CI/CD.\r",
+					"// Be sure to run the collection in CLI with the --ignore-redirects option, otherwise the sessionid cannot be fetched\r",
+					"const cookies = pm.cookies.jar()\r",
+					"let csrfcookie = \"\";\r",
+					"let sesh = \"\";\r",
+					"// This part must only be run when the POST http://localhost:8000/api/auth/login/ is run\r",
+					"if (pm.request.method != 'GET' && pm.request.url == \"http://localhost:8000/api/auth/login/\") {\r",
+					"    csrfcookie = pm.collectionVariables.get(\"csrftoken\")\r",
+					"    cookies.set(\"backend\", \"csrftoken\", csrfcookie)\r",
+					"}\r",
+					"// For all non \"http://localhost:8000/api/auth/login/\" requests this part is run\r",
+					"if(pm.request.url != \"http://localhost:8000/api/auth/login/\"){\r",
+					"    csrfcookie = pm.collectionVariables.get(\"csrftoken\")\r",
+					"    sesh = pm.collectionVariables.get(\"sessionid\")\r",
+					"    \r",
+					"    // Postman currently (as of v10.19.0) features a bug where in the CLI cookies cannot be set one after the other\r",
+					"    // This workaround sets both cookies at the same time.\r",
+					"    cookies.set(\"localhost\", \"csrftoken\", csrfcookie, (error) => {\r",
+					"        cookies.set(\"localhost\", \"sessionid\", sesh);\r",
+					"    });\r",
+					"}"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"// Only after request GET http://localhost:8000/api/auth/login/ should this run\r",
+					"// Because the POST method after requires it\r",
+					"if (pm.request.url == \"http://localhost:8000/api/auth/login/\" && pm.request.method == \"GET\"){\r",
+					"    let temp = pm.response.headers;\r",
+					"    let temp2 = temp.filter(item => item[\"key\"]=== \"Set-Cookie\")\r",
+					"    let temp3 = temp2[0].value\r",
+					"    let temp4 = temp3.slice(10,42)\r",
+					"    pm.collectionVariables.set(\"csrftoken\", temp4)\r",
+					"}\r",
+					"// Only after request POST http://localhost:8000/api/auth/login/ should this run\r",
+					"// Because other methods after this require the CSRFtoken and sessionid\r",
+					"if (pm.request.url == \"http://localhost:8000/api/auth/login/\" && pm.request.method == \"POST\"){\r",
+					"    let temp5 = pm.response.headers;\r",
+					"    let temp6 = temp5.filter(item => item[\"key\"]=== \"Set-Cookie\")\r",
+					"    let temp7 = temp6[0].value\r",
+					"    let temp8 = temp6[1].value\r",
+					"    let temp9 = temp7.slice(10,42)\r",
+					"    let temp10 = temp8.slice(10,42)\r",
+					"    pm.collectionVariables.set(\"csrftoken\", temp9);\r",
+					"    pm.collectionVariables.set(\"sessionid\", temp10);\r",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "csrftoken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "sessionid",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
