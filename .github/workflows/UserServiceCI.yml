@@ -28,7 +28,7 @@ jobs:
           
           - name: Waiting for containers
             run: |
-              sleep 5s
+              sleep 30s
           - name: Running unit tests
             run: |
               docker ps
