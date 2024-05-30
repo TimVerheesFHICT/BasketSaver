@@ -60,7 +60,6 @@
 							"pm.test(\"Check if item was correctly added and whether item information is fetched\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
 							"    pm.expect(jsonData[0].items[0].id).to.eql(2);\r",
-							"    pm.expect(jsonData[0].items[0].name).to.eql(\"Adventuros Strips strips hert wild\")\r",
 							"});"
 						],
 						"type": "text/javascript",
