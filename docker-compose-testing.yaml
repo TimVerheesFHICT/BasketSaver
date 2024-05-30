@@ -69,6 +69,7 @@ services:
       - .:/bsgroceryservice/BasketSaverGroceryListService/
 
   some-rabbit:
+    container_name: some-rabbit
     image: rabbitmq:3-management
     ports:
       - "5672:5672"
