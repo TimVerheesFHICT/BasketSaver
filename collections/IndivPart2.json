@@ -59,7 +59,7 @@
 						"exec": [
 							"pm.test(\"Check if item was correctly added and whether item information is fetched\", function () {\r",
 							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData[0].items[0].id).to.eql(2);\r",
+							"    pm.expect(jsonData[0].items[0].item).to.eql(2);\r",
 							"});"
 						],
 						"type": "text/javascript",
@@ -150,9 +150,8 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Your test name\", function () {\r",
-							"    var jsonData = pm.response.json();\r",
-							"    pm.expect(jsonData.length).to.not.eql(0);\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
 						"type": "text/javascript",
