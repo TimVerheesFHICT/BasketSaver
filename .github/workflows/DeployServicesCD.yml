@@ -10,6 +10,11 @@ jobs:
         steps:
             - name: Checkout Code
               uses: actions/checkout@v2
+            - name: Setup Environment variables
+              run: |
+                mv BasketSaverUserService/.env-azure.example BasketSaverUserService/.env
+                mv BasketSaverCatalogService/.env-azure.example BasketSaverCatalogService/.env
+                mv BasketSaverGroceryListService/.env-azure.example BasketSaverGroceryListService/.env
             - name: Login to Azure
               uses: azure/login@v1
               with:
