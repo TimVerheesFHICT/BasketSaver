@@ -19,5 +19,5 @@ jobs:
                 az acr login --name basketsaverregistry.azurecr.io
             - name: Build docker images
               run: |
-                docker build -f ./BasketSaverCatalogService/Dockerfile.backend ./BasketSaverCatalogService/. -t basketsaverregistry/basketsaver/basketsaver-catalogservice
-                docker push basketsaverregistry/basketsaver/basketsaver-catalogservice
+                docker build -f ./BasketSaverCatalogService/Dockerfile.backend ./BasketSaverCatalogService/. -t basketsaverregistry.azurecr.io/basketsaver/basketsaver-catalogservice:latest
+                docker push basketsaverregistry.azurecr.io/basketsaver/basketsaver-catalogservice:latest
