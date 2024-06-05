@@ -20,4 +20,8 @@ jobs:
             - name: Build docker images
               run: |
                 docker build -f ./BasketSaverCatalogService/Dockerfile.backend ./BasketSaverCatalogService/. -t basketsaverregistry.azurecr.io/basketsaver/basketsaver-catalogservice:latest
+                docker build -f ./BasketSaverGroceryListService/Dockerfile.backend ./BasketSaverGroceryListService/. -t basketsaverregistry.azurecr.io/basketsaver/basketsaver-grocerylistservice:latest
+                docker build -f ./BasketSaverUserService/Dockerfile.backend ./BasketSaverUserService/. -t basketsaverregistry.azurecr.io/basketsaver/basketsaver-userservice:latest
                 docker push basketsaverregistry.azurecr.io/basketsaver/basketsaver-catalogservice:latest
+                docker push basketsaverregistry.azurecr.io/basketsaver/basketsaver-grocerylistservice:latest
+                docker push basketsaverregistry.azurecr.io/basketsaver/basketsaver-userservice:latest
