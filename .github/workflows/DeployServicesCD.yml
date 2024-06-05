@@ -16,5 +16,5 @@ jobs:
                 creds: ${{secrets.AZURE_CREDS}}
             - name: Build docker images
               run: |
-                docker build -f .\BasketSaverCatalogService\Dockerfile.backend .\BasketSaverCatalogService\. -t basketsaverregistry.azurecr.io/basketsavercatalogservice:latest
+                docker build -f ./BasketSaverCatalogService/Dockerfile.backend ./BasketSaverCatalogService/. -t basketsaverregistry.azurecr.io/basketsavercatalogservice:latest
                 docker push basketsaverregistry.azurecr.io/basketsavercatalogservice:latest
