@@ -3,8 +3,6 @@ name: Build and test Python app - BasketSaver
 on:
   push:
     branches: [ 'dev' ]
-  pull_request:
-    branches: [ 'main']
   
 jobs:
   test:
