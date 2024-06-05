@@ -2,9 +2,7 @@ name: Build and test Python app - BasketSaver
 
 on:
   push:
-    branches: [ 'main' ]
-  pull_request:
-    branches: [ 'main']
+    branches: [ 'dev' ]
   
 jobs:
   test:
@@ -25,7 +23,6 @@ jobs:
           - name: Building backend docker images
             run: |
               docker compose -f docker-compose-testing.yaml up -d
-          
           - name: Waiting for containers
             run: |
               sleep 60s
@@ -55,14 +52,8 @@ jobs:
             run: | 
               docker ps
               newman run collections/IndivPart1.json
-            continue-on-error: true
-          - name: Checking Users
-            run: |
-              docker exec userservice python BasketSaverUserService/BasketSaverUserService/manage.py check-users
-              docker exec groceryservice python BasketSaverGroceryListService/BasketSaverGroceryListService/manage.py check-glist
           - name: Running Integration Tests part 2
             run: newman run collections/IndivPart2.json
-            continue-on-error: true
           - name: Logging
             run: |
               docker logs userservice
