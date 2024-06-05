@@ -150,7 +150,7 @@
 					"listen": "test",
 					"script": {
 						"exec": [
-							"pm.test(\"Status code is 200\", function () {\r",
+							"pm.test(\"Checking whether items are correctly fetched.\", function () {\r",
 							"    pm.response.to.have.status(200);\r",
 							"});"
 						],
