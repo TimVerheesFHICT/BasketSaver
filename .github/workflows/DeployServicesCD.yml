@@ -42,7 +42,8 @@ jobs:
               creds: ${{secrets.AZURE_CREDS}}
           - name: Deleting existing instance if it exists
             run: |
-              az container delete --resource-group BasketSaver --name basketsavercatalogservice --yes || echo "No existing container instance to delete"
+              az container delete --resource-group BasketSaver --name basketsavercatalogservice --yes || echo "No basketsavercatalogservice instance to delete"
+              az container delete --resource-group BasketSaver --name basketsavergroceryservice --yes || echo "No basketsavergroceryservice instance to delete"
           - name: Deploy to Azure Container Instance
             run: | 
               az container create \
@@ -55,7 +56,21 @@ jobs:
                 --memory 1.5 \
                 --ports 8000 \
                 --dns-name-label basketsavercatalogpublic \
-                --environment-variables MYSQL_HOST=${{secrets.AZURE_DB}} MYSQL_DATABASE=development MYSQL_USER=bsadmin MYSQL_PORT=5432 MYSQL_PASSWORD=${{secrets.AZURE_DB_PASS}} \
+                --environment-variables MYSQL_HOST=${{secrets.AZURE_CATALOG_DB}} MYSQL_DATABASE=development MYSQL_USER=bsadmin MYSQL_PORT=5432 MYSQL_PASSWORD=${{secrets.AZURE_DB_PASS}} \
                 --command-line "/bin/bash -c 'gunicorn --workers 3 --bind 0.0.0.0:8000 bscatalogservice.wsgi:application'" \
+                --restart-policy Always \
+                --location westeurope
+              az container create \
+                --resource-group BasketSaver \
+                --name basketsavergroceryservice \
+                --registry-username BasketSaverRegistry \
+                --registry-password ${{secrets.AZURE_REG_PASS}} \
+                --image basketsaverregistry.azurecr.io/basketsaver/basketsaver-groceryservice:latest \
+                --cpu 1 \
+                --memory 1.5 \
+                --ports 8000 \
+                --dns-name-label basketsavergrocerypublic \
+                --environment-variables MYSQL_HOST=${{secrets.AZURE_GROCERY_DB}} MYSQL_DATABASE=development MYSQL_USER=bsadmin MYSQL_PORT=5432 MYSQL_PASSWORD=${{secrets.AZURE_DB_PASS}} \
+                --command-line "/bin/bash -c 'gunicorn --workers 3 --bind 0.0.0.0:8000 bsgroceryservice.wsgi:application'" \
                 --restart-policy Always \
                 --location westeurope
