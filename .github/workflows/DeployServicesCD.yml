@@ -42,14 +42,14 @@ jobs:
               creds: ${{secrets.AZURE_CREDS}}
           - name: Deleting existing instance if it exists
             run: |
-              az container delete --resource-group BasketSaver --name basketsavercatalogservice --yes --no-wait || echo "No existing container instance to delete"
+              az container delete --resource-group BasketSaver --name basketsavercatalogservice --yes || echo "No existing container instance to delete"
           - name: Deploy to Azure Container Instance
             run: | 
               az container create \
                 --resource-group BasketSaver \
                 --name basketsavercatalogservice \
                 --registry-username BasketSaverRegistry \
-                --registry-password ${{secrets.AZURE_REG_PASS}}
+                --registry-password ${{secrets.AZURE_REG_PASS}} \
                 --image basketsaverregistry.azurecr.io/basketsaver/basketsaver-catalogservice:latest \
                 --cpu 1 \
                 --memory 1.5 \
