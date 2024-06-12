@@ -6,4 +6,5 @@ RUN pip install -r requirements.txt
 COPY . ./
 EXPOSE 6060
 EXPOSE 8000
-CMD ["python", "manage.py", "runserver"]
+#CMD ["python", "manage.py", "runserver"]
+CMD ["gunicorn", "--workers", "3", "--bind" "0.0.0.0:8000", "bscatalogservice.wsgi:application"]
