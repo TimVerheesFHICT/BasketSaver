@@ -43,7 +43,8 @@ jobs:
           - name: Deleting existing instance if it exists
             run: |
               az container delete --resource-group BasketSaver --name basketsavercatalogservice --yes || echo "No basketsavercatalogservice instance to delete"
-              az container delete --resource-group BasketSaver --name basketsavergroceryservice --yes || echo "No basketsavergroceryservice instance to delete"
+              az container delete --resource-group BasketSaver --name basketsavergroceryservice --yes || echo "No basketsavergrocerservice instance to delete"
+              az container delete --resource-group BasketSaver --name basketsaveruserservice --yes || echo "No basketsaveruserservice instance to delete"
           - name: Deploy to Azure Container Instance
             run: | 
               az container create \
@@ -58,6 +59,20 @@ jobs:
                 --dns-name-label basketsavercatalogpublic \
                 --environment-variables MYSQL_HOST=${{secrets.AZURE_CATALOG_DB}} MYSQL_DATABASE=development MYSQL_USER=bsadmin MYSQL_PORT=5432 MYSQL_PASSWORD=${{secrets.AZURE_DB_PASS}} \
                 --command-line "/bin/bash -c 'gunicorn --workers 3 --bind 0.0.0.0:8000 bscatalogservice.wsgi:application'" \
+                --restart-policy Always \
+                --location westeurope
+              az container create \
+                --resource-group BasketSaver \
+                --name basketsaveruserservice \
+                --registry-username BasketSaverRegistry \
+                --registry-password ${{secrets.AZURE_REG_PASS}} \
+                --image basketsaverregistry.azurecr.io/basketsaver/basketsaver-userservice:latest \
+                --cpu 1 \
+                --memory 1.5 \
+                --ports 8000 \
+                --dns-name-label basketsaveruserpublic \
+                --environment-variables MYSQL_HOST=${{secrets.AZURE_USER_DB}} MYSQL_DATABASE=development MYSQL_USER=bsadmin MYSQL_PORT=5432 MYSQL_PASSWORD=${{secrets.AZURE_DB_PASS}} \
+                --command-line "/bin/bash -c 'gunicorn --workers 3 --bind 0.0.0.0:8000 bsuserservice.wsgi:application'" \
                 --restart-policy Always \
                 --location westeurope
               az container create \

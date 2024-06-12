@@ -26,8 +26,7 @@ SECRET_KEY = 'django-insecure-0p+u8kqh0bl(0f%mo^-8-)r+nq*1te+l(fdl6qrq-=-pbp!0-)
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "145.93.65.159",
-    "localhost"
+    "*",
 ]
 
 
@@ -96,7 +95,7 @@ WSGI_APPLICATION = 'bsuserservice.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'HOST': config('MYSQL_HOST'), # You are supposed to use container_name not localhost
         'PORT': config('MYSQL_PORT'),
         'NAME': config('MYSQL_DATABASE'),
