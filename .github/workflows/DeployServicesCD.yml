@@ -40,6 +40,9 @@ jobs:
             uses: azure/login@v1
             with:
               creds: ${{secrets.AZURE_CREDS}}
+          - name: Azure Container Registry Login
+            run: |
+                az acr login --name basketsaverregistry.azurecr.io
           - name: Deleting existing instance if it exists
             run: |
               az container delete --resource-group BasketSaver --name basketsavercatalogservice --yes --no-wait || echo "No existing container instance to delete"
@@ -48,7 +51,6 @@ jobs:
               az container create \
                 --resource-group BasketSaver \
                 --name basketsavercatalogservice \
-                --registry-username BasketSaverRegistry \
                 --image basketsaverregistry.azurecr.io/basketsaver/basketsaver-catalogservice:latest \
                 --cpu 1 \
                 --memory 1.5 \
