@@ -65,7 +65,7 @@ jobs:
                 --name basketsavergroceryservice \
                 --registry-username BasketSaverRegistry \
                 --registry-password ${{secrets.AZURE_REG_PASS}} \
-                --image basketsaverregistry.azurecr.io/basketsaver/basketsaver-groceryservice:latest \
+                --image basketsaverregistry.azurecr.io/basketsaver/basketsaver-grocerylistservice:latest \
                 --cpu 1 \
                 --memory 1.5 \
                 --ports 8000 \
