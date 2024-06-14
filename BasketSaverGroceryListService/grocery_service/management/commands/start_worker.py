@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
 import pika, sys
-
+from decouple import config
 from grocery_service.models import GroceryList, Store
 
 connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host='some-rabbit'))
+    pika.ConnectionParameters(host=config('RABBIT_HOST')))
 channel = connection.channel()
 
 channel.exchange_declare(exchange='new_user', exchange_type='fanout')

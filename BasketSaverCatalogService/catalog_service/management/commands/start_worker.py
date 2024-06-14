@@ -2,9 +2,9 @@ import pika
 import json
 
 from catalog_service.models import Item
-
+from decouple import config
 connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host='some-rabbit'))
+    pika.ConnectionParameters(host=config('RABBIT_HOST')))
 
 channel = connection.channel()
 

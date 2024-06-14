@@ -57,7 +57,7 @@ jobs:
                 --memory 1.5 \
                 --ports 8000 \
                 --dns-name-label basketsavercatalogpublic \
-                --environment-variables MYSQL_HOST=${{secrets.AZURE_CATALOG_DB}} MYSQL_DATABASE=development MYSQL_USER=bsadmin MYSQL_PORT=5432 MYSQL_PASSWORD=${{secrets.AZURE_DB_PASS}} \
+                --environment-variables MYSQL_HOST=${{secrets.AZURE_CATALOG_DB}} MYSQL_DATABASE=development MYSQL_USER=bsadmin MYSQL_PORT=5432 MYSQL_PASSWORD=${{secrets.AZURE_DB_PASS}} RABBIT_HOST=myrabbitmq.westeurope.azurecontainer.io \
                 --command-line "/bin/bash -c 'gunicorn --workers 3 --bind 0.0.0.0:8000 bscatalogservice.wsgi:application'" \
                 --restart-policy Always \
                 --location westeurope
@@ -71,7 +71,7 @@ jobs:
                 --memory 1.5 \
                 --ports 8000 \
                 --dns-name-label basketsaveruserpublic \
-                --environment-variables MYSQL_HOST=${{secrets.AZURE_USER_DB}} MYSQL_DATABASE=development MYSQL_USER=bsadmin MYSQL_PORT=5432 MYSQL_PASSWORD=${{secrets.AZURE_DB_PASS}} \
+                --environment-variables MYSQL_HOST=${{secrets.AZURE_USER_DB}} MYSQL_DATABASE=development MYSQL_USER=bsadmin MYSQL_PORT=5432 MYSQL_PASSWORD=${{secrets.AZURE_DB_PASS}} RABBIT_HOST=myrabbitmq.westeurope.azurecontainer.io \
                 --command-line "/bin/bash -c 'gunicorn --workers 3 --bind 0.0.0.0:8000 bsuserservice.wsgi:application'" \
                 --restart-policy Always \
                 --location westeurope
@@ -85,7 +85,18 @@ jobs:
                 --memory 1.5 \
                 --ports 8000 \
                 --dns-name-label basketsavergrocerypublic \
-                --environment-variables MYSQL_HOST=${{secrets.AZURE_GROCERY_DB}} MYSQL_DATABASE=development MYSQL_USER=bsadmin MYSQL_PORT=5432 MYSQL_PASSWORD=${{secrets.AZURE_DB_PASS}} \
+                --environment-variables MYSQL_HOST=${{secrets.AZURE_GROCERY_DB}} MYSQL_DATABASE=development MYSQL_USER=bsadmin MYSQL_PORT=5432 MYSQL_PASSWORD=${{secrets.AZURE_DB_PASS}} RABBIT_HOST=myrabbitmq.westeurope.azurecontainer.io \
                 --command-line "/bin/bash -c 'gunicorn --workers 3 --bind 0.0.0.0:8000 bsgroceryservice.wsgi:application'" \
+                --restart-policy Always \
+                --location westeurope
+              az container create \
+                --resource-group myResourceGroup \
+                --name myRabbitMQ \
+                --image rabbitmq:3-management \
+                --cpu 1 \
+                --memory 1.5 \
+                --ports 5672 15672 \
+                --dns-name-label myrabbitmq \
+                --environment-variables RABBITMQ_DEFAULT_USER=bsrabbit RABBITMQ_DEFAULT_PASS=${{secrets.RABBITMQ_PASS}} \
                 --restart-policy Always \
                 --location westeurope
