@@ -90,7 +90,7 @@ jobs:
                 --restart-policy Always \
                 --location westeurope
               az container create \
-                --resource-group myResourceGroup \
+                --resource-group BasketSaver \
                 --name myRabbitMQ \
                 --image rabbitmq:3-management \
                 --cpu 1 \
