@@ -4,7 +4,7 @@ import json
 from catalog_service.models import Item
 from decouple import config
 connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host="myrabbitmq.westeurope.azurecontainer.io"))
+    pika.ConnectionParameters(host="myrabbitmq.bmbdabhrhygxcphe.westeurope.azurecontainer.io"))
 
 channel = connection.channel()
 
