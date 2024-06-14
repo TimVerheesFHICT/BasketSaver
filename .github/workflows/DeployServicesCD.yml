@@ -91,7 +91,7 @@ jobs:
                 --location westeurope
               az container create \
                 --resource-group BasketSaver \
-                --name myRabbitMQ \
+                --name myrabbitmq \
                 --image rabbitmq:3-management \
                 --cpu 1 \
                 --memory 1.5 \
