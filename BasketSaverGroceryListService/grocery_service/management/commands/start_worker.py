@@ -5,7 +5,7 @@ from decouple import config
 from grocery_service.models import GroceryList, Store
 
 connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host=config('RABBIT_HOST')))
+    pika.ConnectionParameters(host="myrabbitmq.westeurope.azurecontainer.io"))
 channel = connection.channel()
 
 channel.exchange_declare(exchange='new_user', exchange_type='fanout')
