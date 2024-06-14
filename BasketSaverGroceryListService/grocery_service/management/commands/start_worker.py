@@ -3,9 +3,9 @@
 import pika, sys
 from decouple import config
 from grocery_service.models import GroceryList, Store
-
+credentials = pika.PlainCredentials('bsrabbit', 'bsrabbit99!?')
 connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host="myrabbitmq.bmbdabhrhygxcphe.westeurope.azurecontainer.io"))
+    pika.ConnectionParameters(host="myrabbitmq.bmbdabhrhygxcphe.westeurope.azurecontainer.io", port=5672, credentials=credentials))
 channel = connection.channel()
 
 channel.exchange_declare(exchange='new_user', exchange_type='fanout')
