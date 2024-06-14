@@ -5,8 +5,9 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 # import model from models.py
 def grocery_messager(created_user):
+        credentials = pika.PlainCredentials('bsrabbit', 'bsrabbit99!?')
         connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host='some-rabbit'))
+        pika.ConnectionParameters(host="myrabbitmq.bmbdabhrhygxcphe.westeurope.azurecontainer.io", port=5672, credentials=credentials))
         channel = connection.channel()
 
         channel.exchange_declare(exchange='new_user', exchange_type='fanout')

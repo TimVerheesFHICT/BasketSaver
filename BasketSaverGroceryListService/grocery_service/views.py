@@ -16,8 +16,9 @@ import uuid
 class RpcClient(object):
 
     def __init__(self):
+        credentials = pika.PlainCredentials('bsrabbit', 'bsrabbit99!?')
         self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host='some-rabbit'))
+            pika.ConnectionParameters(host="myrabbitmq.bmbdabhrhygxcphe.westeurope.azurecontainer.io", port=5672, credentials=credentials))
 
         self.channel = self.connection.channel()
 
