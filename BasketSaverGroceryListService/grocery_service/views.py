@@ -100,12 +100,11 @@ class GroceryListGet(APIView):
         message_list = []
         for grocery_list in grocery_lists:
             grocery_list_items = GroceryListItem.objects.filter(grocery_list = grocery_list).values()
-            if len(grocery_list_items) > 0:
-                message_obj = {
-                    "store": model_to_dict(grocery_list.store)["name"],
-                    "items": list(grocery_list_items)
-                }
-                message_list.append(message_obj)
+            message_obj = {
+                "store": model_to_dict(grocery_list.store)["name"],
+                "items": list(grocery_list_items)
+            }
+            message_list.append(message_obj)
         rpc = RpcClient()
         response = rpc.call(message_list)
         decoded_body = response.decode('utf-8')
