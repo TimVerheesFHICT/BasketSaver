@@ -27,7 +27,8 @@ SECRET_KEY = 'django-insecure-0p+u8kqh0bl(0f%mo^-8-)r+nq*1te+l(fdl6qrq-=-pbp!0-)
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    "basketsavergrocerypublic.westeurope.azurecontainer.io"
+    "basketsavergrocerypublic.westeurope.azurecontainer.io",
+    "*"
 ]
 
 
