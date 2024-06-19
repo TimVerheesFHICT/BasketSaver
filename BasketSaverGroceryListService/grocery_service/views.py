@@ -60,24 +60,26 @@ class GroceryListItemCreate(APIView):
     serializer_class = GroceryListItemSerializer
     
     def post(self,request):
-        store_obj = Store.objects.get(name=request.data["store"])
-        grocery_obj = GroceryList.objects.filter(store=store_obj, user=request.data["user_id"]).first()
-        GroceryListItem.objects.get_or_create(
-            grocery_list = grocery_obj,
-            item = request.data["item"],
-            amount = request.data["amount"],
-        )
-        return Response("Created GroceryList Item Successfully!")
+        for item in request.data:
+            store_obj = Store.objects.get(name=item["store"])
+            grocery_obj = GroceryList.objects.filter(store=store_obj, user=item["user_id"]).first()
+            GroceryListItem.objects.get_or_create(
+                grocery_list = grocery_obj,
+                item = request.data["item"],
+                amount = request.data["amount"],
+            )
+        return Response("Created GroceryList Items Successfully!")
 
 class GroceryListItemDelete(APIView):
     permission_classes = [AllowAny]
     serializer_class = GroceryListItemSerializer
     
     def delete(self,request, *args, **kwargs):
-        gc_list_item = self.request.query_params.get('grocery_list_item')
-        gc_list_item_obj = GroceryListItem.objects.get(pk=gc_list_item)
-        gc_list_item_obj.delete()
-        return Response("Deleted GroceryList Item Successfully!")
+        for item in request.data:
+            gc_list_item = item["grocery_list_id"]
+            gc_list_item_obj = GroceryListItem.objects.get(pk=gc_list_item)
+            gc_list_item_obj.delete()
+            return Response("Deleted GroceryList Item Successfully!")
     
 class GroceryListItemUpdate(APIView):
     permission_classes = [AllowAny]
