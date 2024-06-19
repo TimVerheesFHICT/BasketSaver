@@ -79,7 +79,7 @@ class GroceryListItemDelete(APIView):
             gc_list_item = item["grocery_list_id"]
             gc_list_item_obj = GroceryListItem.objects.get(pk=gc_list_item)
             gc_list_item_obj.delete()
-            return Response("Deleted GroceryList Item Successfully!")
+        return Response("Deleted GroceryList Item Successfully!")
     
 class GroceryListItemUpdate(APIView):
     permission_classes = [AllowAny]
