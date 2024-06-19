@@ -65,8 +65,8 @@ class GroceryListItemCreate(APIView):
             grocery_obj = GroceryList.objects.filter(store=store_obj, user=item["user_id"]).first()
             GroceryListItem.objects.get_or_create(
                 grocery_list = grocery_obj,
-                item = request.data["item"],
-                amount = request.data["amount"],
+                item = item["item"],
+                amount = item["amount"],
             )
         return Response("Created GroceryList Items Successfully!")
 
