@@ -78,7 +78,9 @@ class GroceryListItemDelete(APIView):
         for item in request.data:
             gc_list_item = item["grocery_list_id"]
             gc_list_item_obj = GroceryListItem.objects.get(pk=gc_list_item)
+            print(f"Deleting {gc_list_item_obj}")
             gc_list_item_obj.delete()
+            
         return Response("Deleted GroceryList Item Successfully!")
     
 class GroceryListItemUpdate(APIView):
