@@ -61,17 +61,14 @@ export function LoginScreen() {
             try{
                 const promise1 = await new Promise(async (resolve, reject) => {
                     axiosInstance.post(
-                    process.env.EXPO_PUBLIC_BASE_API_URL + 
-                    process.env.EXPO_PUBLIC_USER_PORT +
+                    "http://" +
+                    process.env.EXPO_PUBLIC_USER_API_URL + 
+                    process.env.EXPO_PUBLIC_ACCESS_PORT +
                     "/user_service/account/login",
                     {
                         "username": username,
                         "password": password,
-                    },
-                    {headers:{
-                        'Content-Type': 'multipart/form-data',
-                    },
-                    maxRedirects: 0})
+                    })
                     .then(async (res) => {
                         await SecureStore.setItemAsync('JWT_token', res.data["access"])
                         resolve("promise1")

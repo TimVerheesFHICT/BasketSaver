@@ -94,8 +94,9 @@ export function RegisterScreen(){
                 const promise1 = await new Promise((resolve, reject) => {
                     axiosInstance
                         .post(
-                            process.env.EXPO_PUBLIC_BASE_API_URL + 
-                            process.env.EXPO_PUBLIC_USER_PORT +
+                            "http://"+
+                            process.env.EXPO_PUBLIC_USER_API_URL + 
+                            process.env.EXPO_PUBLIC_ACCESS_PORT +
                             "/user_service/account/register",
                             {
                                 "username": username,

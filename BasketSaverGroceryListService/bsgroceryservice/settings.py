@@ -26,7 +26,10 @@ SECRET_KEY = 'django-insecure-0p+u8kqh0bl(0f%mo^-8-)r+nq*1te+l(fdl6qrq-=-pbp!0-)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    "basketsavergrocerypublic.westeurope.azurecontainer.io",
+    "*"
+]
 
 
 # Application definition
@@ -89,7 +92,7 @@ REST_FRAMEWORK = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'HOST': config('MYSQL_HOST'), # You are supposed to use container_name not localhost
         'PORT': config('MYSQL_PORT'),
         'NAME': config('MYSQL_DATABASE'),

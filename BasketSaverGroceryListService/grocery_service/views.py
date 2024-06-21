@@ -16,8 +16,9 @@ import uuid
 class RpcClient(object):
 
     def __init__(self):
+        credentials = pika.PlainCredentials('bsrabbit', 'bsrabbit99!?')
         self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host='some-rabbit'))
+            pika.ConnectionParameters(host="myrabbitmq.bmbdabhrhygxcphe.westeurope.azurecontainer.io", port=5672, credentials=credentials))
 
         self.channel = self.connection.channel()
 
@@ -59,23 +60,27 @@ class GroceryListItemCreate(APIView):
     serializer_class = GroceryListItemSerializer
     
     def post(self,request):
-        store_obj = Store.objects.get(name=request.data["store"])
-        grocery_obj = GroceryList.objects.filter(store=store_obj, user=request.data["user_id"]).first()
-        GroceryListItem.objects.get_or_create(
-            grocery_list = grocery_obj,
-            item = request.data["item"],
-            amount = request.data["amount"],
-        )
-        return Response("Created GroceryList Item Successfully!")
+        for item in request.data:
+            store_obj = Store.objects.get(name=item["store"])
+            grocery_obj = GroceryList.objects.filter(store=store_obj, user=item["user_id"]).first()
+            GroceryListItem.objects.get_or_create(
+                grocery_list = grocery_obj,
+                item = item["item"],
+                amount = item["amount"],
+            )
+        return Response("Created GroceryList Items Successfully!")
 
 class GroceryListItemDelete(APIView):
     permission_classes = [AllowAny]
     serializer_class = GroceryListItemSerializer
     
     def delete(self,request, *args, **kwargs):
-        gc_list_item = self.request.query_params.get('grocery_list_item')
-        gc_list_item_obj = GroceryListItem.objects.get(pk=gc_list_item)
-        gc_list_item_obj.delete()
+        for item in request.data:
+            gc_list_item = item["grocery_list_id"]
+            gc_list_item_obj = GroceryListItem.objects.get(pk=gc_list_item)
+            print(f"Deleting {gc_list_item_obj}")
+            gc_list_item_obj.delete()
+            
         return Response("Deleted GroceryList Item Successfully!")
     
 class GroceryListItemUpdate(APIView):
@@ -99,12 +104,11 @@ class GroceryListGet(APIView):
         message_list = []
         for grocery_list in grocery_lists:
             grocery_list_items = GroceryListItem.objects.filter(grocery_list = grocery_list).values()
-            if len(grocery_list_items) > 0:
-                message_obj = {
-                    "store": model_to_dict(grocery_list.store)["name"],
-                    "items": list(grocery_list_items)
-                }
-                message_list.append(message_obj)
+            message_obj = {
+                "store": model_to_dict(grocery_list.store)["name"],
+                "items": list(grocery_list_items)
+            }
+            message_list.append(message_obj)
         rpc = RpcClient()
         response = rpc.call(message_list)
         decoded_body = response.decode('utf-8')
@@ -113,3 +117,11 @@ class GroceryListGet(APIView):
         return Response(full_payload)
         
 
+class UserDelete(APIView):
+    permission_classes = [AllowAny]
+    serializer_class = GroceryListSerializer
+    def delete(self,request, *args, **kwargs):
+        gc_lists = GroceryList.objects.filter(user=request.data["user_id"])
+        for gc in gc_lists:
+            gc.delete()
+        return Response("Account deletion successful.")

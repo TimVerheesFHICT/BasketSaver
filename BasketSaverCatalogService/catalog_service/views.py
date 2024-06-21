@@ -17,7 +17,7 @@ class ItemSearch(APIView):
         products = []
         last_product_store = ""
         store_product_list = []
-        pattern = re.compile(rf'\b({search_term}|-{search_term}|{search_term}-)\b', re.IGNORECASE)
+        pattern = re.compile(rf'\b{search_term}\b|(?<=-){search_term}\b|\b{search_term}(?=-)', re.IGNORECASE)
         for product in items:
             if pattern.search(product["name"]):
                 if last_product_store != product["store"] and len(store_product_list) != 0:

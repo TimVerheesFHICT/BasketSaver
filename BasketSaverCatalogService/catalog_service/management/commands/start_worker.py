@@ -2,9 +2,10 @@ import pika
 import json
 
 from catalog_service.models import Item
-
+from decouple import config
+credentials = pika.PlainCredentials('bsrabbit', 'bsrabbit99!?')
 connection = pika.BlockingConnection(
-    pika.ConnectionParameters(host='some-rabbit'))
+    pika.ConnectionParameters(host="myrabbitmq.bmbdabhrhygxcphe.westeurope.azurecontainer.io", port=5672, credentials=credentials))
 
 channel = connection.channel()
 
