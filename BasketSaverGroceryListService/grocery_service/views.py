@@ -117,3 +117,10 @@ class GroceryListGet(APIView):
         return Response(full_payload)
         
 
+class UserDelete(APIView):
+    permission_classes = [AllowAny]
+    serializer_class = GroceryListSerializer
+    def delete(self,request, *args, **kwargs):
+        gc_lists = GroceryList.objects.filter(user=request.data["user_id"])
+        for gc in gc_lists:
+            gc.delete()

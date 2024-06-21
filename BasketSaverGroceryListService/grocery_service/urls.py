@@ -20,5 +20,6 @@ urlpatterns = [
     path('grocery_list/get_items', GroceryListGet.as_view()),
     path('grocery_list/item_add', GroceryListItemCreate.as_view()),
     path('grocery_list/item_delete', GroceryListItemDelete.as_view()),
-    path('grocery_list/item_update', GroceryListItemUpdate.as_view())
+    path('grocery_list/item_update', GroceryListItemUpdate.as_view()),
+    path('grocery_list/grocery_list_delete', UserDelete.as_view())
 ]

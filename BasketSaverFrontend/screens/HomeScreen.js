@@ -1,4 +1,4 @@
-import { View, Text, Button, StyleSheet, Image, TextInput, TouchableOpacity,
+import { View, Text, Alert, Button, StyleSheet, Image, TextInput, TouchableOpacity,
     KeyboardAvoidingView, Keyboard, Platform, TouchableWithoutFeedback, NativeModules, BackHandler, Dimensions, ScrollView, Linking } from 'react-native';
 import React, {useState, useEffect, useCallback} from 'react';
 import { useFonts } from 'expo-font';
@@ -6,6 +6,9 @@ import * as SecureStore from 'expo-secure-store';
 import * as SplashScreen from 'expo-splash-screen';
 import { Shadow } from 'react-native-shadow-2';
 import axios from "axios";
+import "core-js/stable/atob";
+import { jwtDecode } from 'jwt-decode';
+import { useNavigation } from '@react-navigation/native';
 export function HomeScreen() {
     var height = Dimensions.get('window').height;
     var width = Dimensions.get('window').width
@@ -14,7 +17,12 @@ export function HomeScreen() {
     const [searchFocused, setSearchFocused] = useState("#CACACA")
     const [hasSearched, setHasSearched] = useState(false)
     const [isLoading, setIsLoading] = useState(false)
+    const [gcLoading, setGcLoading] = useState(true)
+    const [batchLoading, setBatchLoading] = useState(false)
     const [searchResults, setSearchResults] = useState([])
+    const [groceryList, setGroceryList] = useState([])
+    const [, updateState] = useState();
+    const forceUpdate = useCallback(() => updateState({}), []);
     const [fontsLoaded, fontsError] = useFonts({
         'Source Sans Pro': require('../assets/fonts/SourceSansPro-Regular.otf'),
         'Source Sans Pro Italic': require('../assets/fonts/SourceSansPro-It.otf'),
@@ -22,6 +30,7 @@ export function HomeScreen() {
         'Source Sans Pro Light Italic': require('../assets/fonts/SourceSansPro-LightIt.otf'),
         'Staatliches': require('../assets/fonts/Staatliches-Regular.ttf')
     })
+    const navigation = useNavigation();
     
     async function check_logged_in(){
         let token = await SecureStore.getItemAsync('JWT_token')
@@ -29,7 +38,10 @@ export function HomeScreen() {
             navigation.navigate('Login')
         }
     }
-
+    function getUserId(){
+        const decoded = jwtDecode(SecureStore.getItem('JWT_token'))
+        return decoded["user_id"]
+    }
 
     function ImageSwitcher(store){
         if (store == "ah"){
@@ -147,17 +159,99 @@ export function HomeScreen() {
             Linking.openURL("https://www.aldi.nl/producten/" + url)
         }
     }
+    function handleAddProduct(store, itemID, name, url, price, weight){
+        if (SecureStore.getItem("localGroceryAdditions") == undefined){
+            SecureStore.setItem("localGroceryAdditions", "[]")
+        }
+        let previousAdditionsList = JSON.parse(SecureStore.getItem("localGroceryAdditions"))
+        previousAdditionsList = previousAdditionsList.concat({
+            "user_id": getUserId(),
+            "store": store,
+            "item": itemID,
+            "amount": 1
+        })
+        SecureStore.setItem("localGroceryAdditions", JSON.stringify(previousAdditionsList))
+        const currentGorceryListData = JSON.parse(SecureStore.getItem("GroceryListData"))
+        currentGorceryListData.map((listStore, index) =>{
+            if (listStore.store == store){
+                listStore.items = listStore.items.concat({
+                    "item": itemID,
+                    "amount": 1,
+                    "name": name,
+                    "url": url,
+                    "price": price,
+                    "weight": weight
+                })
+            } 
+        })
+        console.log(JSON.stringify(currentGorceryListData))
+        setGroceryList(currentGorceryListData)
+        SecureStore.setItem("GroceryListData", JSON.stringify(currentGorceryListData))
+        console.log(groceryList)
+    }
+    const removeItemFromStore = (store, itemID) => {
+        setGroceryList(prevData =>{
+            const newData = prevData.map(entry =>{
+                if (entry.store == store){
+                    
+                    const itemIndex = entry.items.findIndex(item => item.item === itemID);
+                    
+                    if (itemIndex !== -1) {
+                        return {
+                            ...entry,
+                            items: entry.items.filter((_, index) => index !== itemIndex)
+                        };
+                    }
+                }
+                return entry
+            })
+            SecureStore.setItem("GroceryListData", JSON.stringify(newData))
+            return newData
+        })
+    }
+    function handleRemoveProduct(store, itemID, name){
+        if (SecureStore.getItem("localGroceryRemovals") == undefined){
+            SecureStore.setItem("localGroceryRemovals", "[]")
+        }
+        if (SecureStore.getItem("localGroceryAdditions") == undefined || JSON.parse(SecureStore.getItem("localGroceryAdditions")).find(entry => entry.item == itemID) == undefined){
+            console.log("Reached1")
+            let removeList = JSON.parse(SecureStore.getItem("localGroceryRemovals"))
+            const currentStore = groceryList.find(storeEntry => storeEntry.store == store)
+            console.log(currentStore)
+            const gcItem = currentStore.items.find(itemEntry => itemEntry.item == itemID)
+            const gcID = gcItem.id
+            removeList = removeList.concat({
+                "grocery_list_id": gcID,
+                "name": name
+            })
+            SecureStore.setItem("localGroceryRemovals",JSON.stringify(removeList))
+        }
+        else{
+            console.log("Reached2")
+            let localAdditions = JSON.parse(SecureStore.getItem("localGroceryAdditions"))
+            const foundItem = localAdditions.findIndex(itemEntry => itemEntry.item == itemID)
+            if (foundItem !== -1){
+                localAdditions.splice(foundItem, 1)
+            }
+            SecureStore.setItem("localGroceryAdditions",JSON.stringify(localAdditions))
+            console.log(SecureStore.getItem("localGroceryAdditions"))
+        }
+        removeItemFromStore(store,itemID)
+        console.log(SecureStore.getItem("localGroceryRemovals"))
+    }
     async function HandleSearch(query){
         if (searchText){
             console.log(query)
+            console.log(process.env.EXPO_PUBLIC_CATALOG_API_URL)
             setIsLoading(true)
             setHasSearched(true)
             const axiosInstance = axios.create();
             try{
                 const promise1 = await new Promise(async (resolve, reject) => {
                     axiosInstance.get(
-                    process.env.EXPO_PUBLIC_BASE_API_URL + 
-                    process.env.EXPO_PUBLIC_CATALOG_PORT +
+                    "http://" +
+                    process.env.EXPO_PUBLIC_CATALOG_API_URL + 
+                    process.env.EXPO_PUBLIC_ACCESS_PORT +
                     "/catalog_service/get_items?search_query=" + query)
                     .then(async (res) => {
                         setSearchResults(res.data)
@@ -177,12 +271,84 @@ export function HomeScreen() {
             }
         }
     }
-
+    function handleLogout(){
+        SecureStore.deleteItemAsync("GroceryListData")
+        SecureStore.deleteItemAsync("localGroceryAdditions")
+        SecureStore.deleteItemAsync("JWT_token")
+        SecureStore.deleteItemAsync("localGroceryRemovals")
+        navigation.navigate('Login')
+    }
+    
+    const handleBatchJob = () => {
+        const axiosInstance = axios.create();
+        if (SecureStore.getItem("localGroceryRemovals") != undefined && SecureStore.getItem("localGroceryRemovals") != "[]"){
+            const temp = SecureStore.getItem("localGroceryRemovals")
+            const temp2 = JSON.parse(temp)
+            axiosInstance.delete(
+                "http://"+
+                process.env.EXPO_PUBLIC_GROCERY_API_URL + 
+                process.env.EXPO_PUBLIC_ACCESS_PORT +
+                "/grocery_service/grocery_list/item_delete",
+                { data: temp2 }
+            )
+            .then(
+                SecureStore.setItem("localGroceryRemovals", "[]"),
+                console.log("reached1"),
+            )
+            .catch((e)=> console.log(e))
+        }
+        if (SecureStore.getItem("localGroceryAdditions") != undefined && SecureStore.getItem("localGroceryAdditions") != "[]"){
+            axiosInstance.post(
+                "http://"+
+                process.env.EXPO_PUBLIC_GROCERY_API_URL + 
+                process.env.EXPO_PUBLIC_ACCESS_PORT +
+                "/grocery_service/grocery_list/item_add",
+                JSON.parse(SecureStore.getItem("localGroceryAdditions"))
+            )
+            .then(
+                SecureStore.setItem("localGroceryAdditions", "[]"),
+                console.log("reached2"),
+            )
+        }
+        Alert.alert('Grocery List Saved', 'Your grocery list has been saved successfully.',[
+            {
+                text: "Okay",
+                style: 'cancel'
+            }
+        ])
+    }
     useEffect(() => {
-    //     check_logged_in()
-    //     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true)
-    //     return () => backHandler.remove()
+        check_logged_in()
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => true)
+        
+        if (SecureStore.getItem('GroceryListData') == undefined){
+            console.log("in")
+            const axiosInstance = axios.create();
+            axiosInstance.get(
+                "http://" +
+                process.env.EXPO_PUBLIC_GROCERY_API_URL + 
+                process.env.EXPO_PUBLIC_ACCESS_PORT +
+                "/grocery_service/grocery_list/get_items?user_id=" + getUserId())
+                .then(async (res) => {
+                    const data = JSON.stringify(res.data)
+                    SecureStore.setItem("GroceryListData", data)
+                    const unparsedData = SecureStore.getItem("GroceryListData")
+                    const parsedData = JSON.parse(unparsedData)
+                    setGroceryList(parsedData)
+                    console.log(groceryList)
+                    setGcLoading(false)
+                })
+                .catch(error => console.log(error))
+            
+        }
+        else{
+            const glData = SecureStore.getItem("GroceryListData")
+            const jsonGlData = JSON.parse(glData)
+            setGroceryList(jsonGlData)
+            setGcLoading(false)
+        }
         console.log(width)
+        return () => backHandler.remove()
       }, [])
     const onLayoutRootView = useCallback(async () => {
         if (fontsLoaded || fontsError) {
@@ -233,10 +399,9 @@ return(
                             searchResults.map((store, index) => {
                             return(
                                 <>
-                                    <Image style={[store.store === "ah" || store.store === "dirk" || store.store === "picnic" || store.store === "aldi" || store.store === "vomar" || store.store === "spar" ? styles.store_logo_small : styles.store_logo_long, {marginLeft: 15}]} source={ImageSwitcher(store.store)} resizeMode="contain"></Image>
+                                    <Image key={index} style={[store.store === "ah" || store.store === "dirk" || store.store === "picnic" || store.store === "aldi" || store.store === "vomar" || store.store === "spar" ? styles.store_logo_small : styles.store_logo_long, {marginLeft: 15}]} source={ImageSwitcher(store.store)} resizeMode="contain"></Image>
                                     {store.items.map((product, index) => (
-                                        <>
-                                            <View key={product.id} style={[styles.product_card, {width: width, height: 200}]}>
+                                            <View key={index} style={[styles.product_card, {width: width, height: 200}]}>
                                                 <Text style={styles.product_name}>{product.name}</Text>
                                                 {index === 0 && (
                                                     <Text style={styles.cheapest_product}>CHEAPEST</Text>
@@ -249,12 +414,12 @@ return(
                                                 <Text onPress={() => HandleSiteClick(product.store, product.url)} style={styles.site_link}>{SiteSwitcher(store.store)}</Text>
                                                 <View style={styles.add_button_container}>
                                                     <Text style={styles.add_text}>Add to shopping list</Text>
-                                                    <Image resizeMode='contain' style={styles.add_button} source={require("../assets/add_button.png")}></Image>
+                                                    <TouchableOpacity style={{marginTop: 0, maxHeight: 50, maxWidth: 50 }} onPress={()=> handleAddProduct(product.store, product.id, product.name, product.url, product.price, product.weight)} >
+                                                        <Image id={product.id} style={styles.add_button} resizeMode='contain' source={require("../assets/add_button.png")}></Image>
+                                                    </TouchableOpacity>
                                                 </View>
                                             </View>
-                                        </>
                                     ))}
-                                    
                                 </>);
                         })
                         )} 
@@ -262,6 +427,60 @@ return(
                 </View>
             </>
         )}
+        {identifier === 'grocery_lists' && (
+            <View style={[{flex: 1, overflow: 'scroll', marginBottom: 78, width: width}]}>
+                <ScrollView>
+                    {gcLoading === true ? (
+                        <>
+                        <Image style={[styles.loading_gif, {marginTop: height * 0.3, left: width * 0.25}]} source={require("../assets/Loading.gif")} resizeMode="contain"></Image>
+                        </>
+                    ):(
+                        groceryList.map((store, index) => {
+                            return(
+                                <>
+                                <Image key={index} style={[store.store === "ah" || store.store === "dirk" || store.store === "picnic" || store.store === "aldi" || store.store === "vomar" || store.store === "spar" ? styles.store_logo_small : styles.store_logo_long, {marginLeft: 15}]} source={ImageSwitcher(store.store)} resizeMode="contain"></Image>
+                            {store.items.length == 0 ? (
+                                <>
+                                <Text>This Grocery list is empty</Text>
+                                </>
+                        ):(
+                            store.items.map((product, index) => (
+                                <View key={index} style={[styles.product_card, {width: width, height: 200}]}>
+                                    <Text style={styles.product_name}>{product.name}</Text>
+                                    <Text style={styles.product_weight}>{product.weight === "0" ? "" : product.weight}</Text>
+                                    <View style={styles.price_container}>
+                                        <Text style={styles.product_price_euros}>{extractEuros(product.price)}</Text>
+                                        <Text style={styles.product_price_cents}>{extractCents(product.price)}</Text>
+                                    </View>
+                                    <Text onPress={() => HandleSiteClick(product.store, product.url)} style={styles.site_link}>{SiteSwitcher(store.store)}</Text>
+                                    <View style={styles.add_button_container}>
+                                        <Text style={styles.add_text}>Remove</Text>
+                                        <TouchableOpacity style={{marginTop: 0, maxHeight: 50, maxWidth: 50 }} onPress={()=> handleRemoveProduct(store.store, product.item, product.name)} >
+                                            <Image id={product.id} style={styles.add_button} resizeMode='contain' source={require("../assets/remove_button.png")}></Image>
+                                        </TouchableOpacity>
+                                    </View>
+                                </View>
+                            ))
+                        )
+                                }
+                                </>
+                            )
+                        }
+                    )
+                    )}
+                    
+        </ScrollView>
+            <TouchableOpacity onPress={() => handleBatchJob()} style={styles.save_button_container}>
+                <Image style={styles.save_button} source={require("../assets/save_button.png")}></Image>
+            </TouchableOpacity>
+        </View>
+        )}
+        {identifier === 'profile' && (
+                <>
+                <Text onPress={() => handleLogout()} style={styles.logout}>Logout</Text>
+                </>
+            )
+        }
         
             <View style={styles.navigation_bar}>
                 {identifier === 'home' ? (
@@ -305,6 +524,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#FCFCFC',
         alignItems: 'center',
         flex: 1,
+        width: "100%"
     },
     top_logo_container:{
         height: 75,
@@ -445,7 +665,8 @@ const styles = StyleSheet.create({
         bottom: 10,
         gap: 10,
         justifyContent: "center",
-        alignItems: "center"
+        alignItems: "center",
+        textAlign: "center"
     },
     add_text:{
         fontFamily: 'Source Sans Pro Light',
@@ -454,5 +675,22 @@ const styles = StyleSheet.create({
     add_button:{
         maxHeight: 50,
         maxWidth: 50
+    },
+    logout:{
+        fontSize: 20,
+        fontFamily: 'Source Sans Pro Light',
+        color: "#0492A9",
+    },
+    save_button_container:{
+        position: "absolute",
+        bottom: 10,
+        right: 25,
+        borderRadius: 150,
+        overlayColor: '#0097B2',
+    },
+    save_button:{
+        width: 75,
+        height: 75,
+        
     }
   });
