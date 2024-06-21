@@ -124,3 +124,4 @@ class UserDelete(APIView):
         gc_lists = GroceryList.objects.filter(user=request.data["user_id"])
         for gc in gc_lists:
             gc.delete()
+        return Response("Account deletion successful.")

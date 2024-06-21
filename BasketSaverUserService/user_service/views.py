@@ -10,6 +10,7 @@ from .serializers import MyTokenObtainPairSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.views import APIView
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework.response import Response
 
 # create a viewset
 class UserCreate(CreateAPIView):
@@ -27,3 +28,4 @@ class UserDelete(APIView):
     def delete(self,request, *args, **kwargs):
         user = User.objects.get(pk=request.data["user_id"])
         user.delete()
+        return Response("Account deletion successful")
